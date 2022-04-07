@@ -7,7 +7,10 @@ const app = express()
 const port = 3000
 
 
-app.use(morgan('dev'))
+app
+    .use(favicon(__dirname + '/favicon.ico'))
+    .use(morgan('dev'))
+
 
 // Middleware Méthode 1 : Affiche dans le terminal le nom de la route et la méthode
 /*const loggerTerminal = (req, res, next) => {
