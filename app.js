@@ -1,16 +1,26 @@
 const express = require('express')
+const morgan = require('morgan')
 const { success } = require('./helper.js')
 let pokemons = require('./mock-pokemon')
 
 const app = express()
 const port = 3000
 
-// Middleware : Affiche dans le terminal le nom de la route et la méthode
-const loggerTerminal = (req, res, next) => {
+
+app.use(morgan('dev'))
+
+// Middleware Méthode 1 : Affiche dans le terminal le nom de la route et la méthode
+/*const loggerTerminal = (req, res, next) => {
   console.log(`${req.host} - ${req.method} : ${req.url}`)
   next()
 }
-app.use(loggerTerminal)
+app.use(loggerTerminal)*/
+
+// Middleware Méthode 2 (plus courte) : Affiche dans le terminal le nom de la route et la méthode
+/*app.use((req, res, next) => {
+  console.log(`${req.host} - ${req.method} : ${req.url}`)
+  next()
+})*/
 
 
 app.get('/', (req,res) => res.send('Hello again, Express !'))
