@@ -1,11 +1,43 @@
 const express = require('express')
 const morgan = require('morgan')
 const bodyParser = require('body-parser')
+const Sequelize = require('sequelize')
 const { success, getUniqueId } = require('./helper.js')
 let pokemons = require('./mock-pokemon')
 
 const app = express()
 const port = 3000
+
+const db_name = 'pokedex-udemy'
+const db_username = 'root'
+const db_password = ''
+
+// Connexion à la base de données
+const sequelize = new Sequelize(
+    // db name
+    `${db_name}`,
+    // username mariadb
+    `${db_username}`,
+    // password mariadb
+    `${db_password}`,
+    {
+  host: 'localhost',
+  dialect: 'mariadb',
+        dialect_options: {
+            timezone: 'Etc/GMT-2'
+        },
+        logging: false
+})
+
+sequelize
+    .authenticate()
+    .then(() => {
+        console.log('Connection to database has been established successfully.')
+    })
+    .catch(err => {
+        console.error('Unable to connect to the database:', err)
+    })
+
 
 // MIDDLEWARES
 app
