@@ -18,7 +18,7 @@ app
 
 app.get('/', (req,res) => res.send('Hello again, Express !'))
 
-// On retourne la liste des pokémons au format JSON, avec un message :
+
 // READ ALL Pokemons
 app.get('/api/pokemons', (req, res) => {
     const message = 'La liste des pokémons a bien été récupérée.'
@@ -26,7 +26,7 @@ app.get('/api/pokemons', (req, res) => {
 })
 
 // READ BY ID Pokemon
-app.ge('/api/pokemons/:id', (req, res) => {
+app.get('/api/pokemons/:id', (req, res) => {
     const id = parseInt(req.params.id)
     const pokemon = pokemons.find(pokemon => pokemon.id === id)
     const message = 'Un pokémon a bien été trouvé.'
@@ -51,6 +51,15 @@ app.put('/api/pokemons/:id', (req, res) => {
     })
     const message = `Le pokémon ${pokemonUpdated.name} a bien été modifié.`
     res.json(success(message, pokemonUpdated))
+});
+
+// DELETE Pokemon
+app.delete('/api/pokemons/:id', (req, res) => {
+    const id = parseInt(req.params.id)
+    const pokemonDeleted = pokemons.find(pokemon => pokemon.id === id)
+    pokemons = pokemons.filter(pokemon => pokemon.id !== id)
+    const message = `Le pokémon ${pokemonDeleted.name} a bien été supprimé.`
+    res.json(success(message, pokemonDeleted))
 });
 
 app.listen(port, () => console.log(`Node App is running on : http://localhost:${port}`))
