@@ -1,11 +1,67 @@
 const express = require('express')
 const morgan = require('morgan')
 const bodyParser = require('body-parser')
+const { Sequelize, DataTypes } = require('sequelize')
 const { success, getUniqueId } = require('./helper.js')
 let pokemons = require('./mock-pokemon')
+const pokemonModel = require('./src/models/pokemon')
+
 
 const app = express()
 const port = 3000
+
+const db_name = 'pokedex-udemy'
+const db_username = 'root'
+const db_password = ''
+const db_host = 'localhost'
+
+// Connexion à la base de données
+const sequelize = new Sequelize(
+    // db name
+    `${db_name}`,
+    // username mariadb
+    `${db_username}`,
+    // password mariadb
+    `${db_password}`,
+    {
+  host: `${db_host}`,
+  dialect: 'mariadb',
+        dialect_options: {
+            timezone: 'Etc/GMT-2'
+        },
+        logging: false
+})
+
+sequelize
+    .authenticate()
+    .then(() => {
+        console.log(`Connection to database ${db_name} has been established successfully. \n`)
+    })
+    .catch(err => {
+        console.error(`Unable to connect to the database ${db_name} \n`, err)
+    })
+
+const Pokemon = pokemonModel(sequelize, DataTypes)
+
+sequelize.sync({ force: true })
+    .then(() => {
+        console.log(`Database ${db_name} has been synced successfully. \n`)
+
+        // Insert datas into database
+        // Insert all pokemons present in the mock-pokemon.js file
+        pokemons.map(pokemon => {
+            Pokemon.create({
+                name: pokemon.name,
+                hp: pokemon.hp,
+                cp: pokemon.cp,
+                picture: pokemon.picture,
+                types: pokemon.types.join()
+            }).then(pokemon => console.log(pokemon.toJSON()))
+        })
+    })
+    .catch(err => {
+        console.error(`Unable to create database & tables \n`, err)
+    })
 
 // MIDDLEWARES
 app
@@ -16,20 +72,20 @@ app
 
 
 
-app.get('/', (req,res) => res.send('Hello again, Express !'))
+app.get('/', (req,res) => res.send('API REST Pokemons'))
 
-// On retourne la liste des pokémons au format JSON, avec un message :
+
 // READ ALL Pokemons
 app.get('/api/pokemons', (req, res) => {
-    const message = 'La liste des pokémons a bien été récupérée.'
+    const message = 'All Pokemons have been retrieved successfully. \n'
     res.json(success(message, pokemons))
 })
 
 // READ BY ID Pokemon
-app.ge('/api/pokemons/:id', (req, res) => {
+app.get('/api/pokemons/:id', (req, res) => {
     const id = parseInt(req.params.id)
     const pokemon = pokemons.find(pokemon => pokemon.id === id)
-    const message = 'Un pokémon a bien été trouvé.'
+    const message = 'The Pokemon has been retrieved successfully. \n'
     res.json(success(message, pokemon))
 })
 
@@ -38,7 +94,7 @@ app.post('/api/pokemons', (req, res) => {
     const id = getUniqueId(pokemons)
     const pokemonCreated = { ...req.body, ...{id: id, created: new Date()}}
     pokemons.push(pokemonCreated)
-    const message = `Le pokémon ${pokemonCreated.name} a bien été crée.`
+    const message = `Pokemon ${pokemonCreated.name} has been created successfully. \n`
     res.json(success(message, pokemonCreated))
 })
 
@@ -49,11 +105,20 @@ app.put('/api/pokemons/:id', (req, res) => {
     pokemons = pokemons.map(pokemon => {
         return pokemon.id === id ? pokemonUpdated : pokemon
     })
-    const message = `Le pokémon ${pokemonUpdated.name} a bien été modifié.`
+    const message = `The Pokemon ${pokemonUpdated.name} has been updated successfully. \n`
     res.json(success(message, pokemonUpdated))
 });
 
-app.listen(port, () => console.log(`Node App is running on : http://localhost:${port}`))
+// DELETE Pokemon
+app.delete('/api/pokemons/:id', (req, res) => {
+    const id = parseInt(req.params.id)
+    const pokemonDeleted = pokemons.find(pokemon => pokemon.id === id)
+    pokemons = pokemons.filter(pokemon => pokemon.id !== id)
+    const message = `The Pokemon ${pokemonDeleted.name} has been deleted successfully. \n`
+    res.json(success(message, pokemonDeleted))
+});
+
+app.listen(port, () => console.log(`\n Node App is running on : http://localhost:${port} \n`))
 
 
 
