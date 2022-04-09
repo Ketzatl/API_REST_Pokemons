@@ -1,4 +1,10 @@
-API Rest Pokemons Project
+# API Rest Pokemons Project
 
-    This is an exercice to create a simple API Rest for Pokemons.
+### This is an exercice, a simple API Rest for Pokemons.
+
+
+## How To :
+
+### How to run this project :
+> npm start
     
