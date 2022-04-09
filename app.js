@@ -1,15 +1,60 @@
 const express = require('express')
 const morgan = require('morgan')
-const { success } = require('./helper.js')
+const bodyParser = require('body-parser')
+const { success, getUniqueId } = require('./helper.js')
 let pokemons = require('./mock-pokemon')
 
 const app = express()
 const port = 3000
 
-
+// MIDDLEWARES
 app
-    .use(favicon(__dirname + '/favicon.ico'))
+    // .use(favicon(__dirname + '/favicon.ico'))
     .use(morgan('dev'))
+    .use(express.json())
+    .use(bodyParser.json())
+
+
+
+app.get('/', (req,res) => res.send('Hello again, Express !'))
+
+// On retourne la liste des pokémons au format JSON, avec un message :
+// READ ALL Pokemons
+app.get('/api/pokemons', (req, res) => {
+    const message = 'La liste des pokémons a bien été récupérée.'
+    res.json(success(message, pokemons))
+})
+
+// READ BY ID Pokemon
+app.ge('/api/pokemons/:id', (req, res) => {
+    const id = parseInt(req.params.id)
+    const pokemon = pokemons.find(pokemon => pokemon.id === id)
+    const message = 'Un pokémon a bien été trouvé.'
+    res.json(success(message, pokemon))
+})
+
+// CREATE Pokemon
+app.post('/api/pokemons', (req, res) => {
+    const id = getUniqueId(pokemons)
+    const pokemonCreated = { ...req.body, ...{id: id, created: new Date()}}
+    pokemons.push(pokemonCreated)
+    const message = `Le pokémon ${pokemonCreated.name} a bien été crée.`
+    res.json(success(message, pokemonCreated))
+})
+
+// UPDATE Pokemon
+app.put('/api/pokemons/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const pokemonUpdated = { ...req.body, id: id }
+    pokemons = pokemons.map(pokemon => {
+        return pokemon.id === id ? pokemonUpdated : pokemon
+    })
+    const message = `Le pokémon ${pokemonUpdated.name} a bien été modifié.`
+    res.json(success(message, pokemonUpdated))
+});
+
+app.listen(port, () => console.log(`Node App is running on : http://localhost:${port}`))
+
 
 
 // Middleware Méthode 1 : Affiche dans le terminal le nom de la route et la méthode
@@ -24,50 +69,3 @@ app.use(loggerTerminal)*/
   console.log(`${req.host} - ${req.method} : ${req.url}`)
   next()
 })*/
-
-
-app.get('/', (req,res) => res.send('Hello again, Express !'))
-
-// On retourne la liste des pokémons au format JSON, avec un message :
-app.get('/api/pokemons', (req, res) => {
-    const message = 'La liste des pokémons a bien été récupérée.'
-    res.json(success(message, pokemons))
-})
-
-// Retourne un Pokemon en fonction de son ID
-app.get('/api/pokemons/:id', (req, res) => {
-    const id = parseInt(req.params.id)
-    const pokemon = pokemons.find(pokemon => pokemon.id === id)
-    const message = 'Un pokémon a bien été trouvé.'
-    res.json(success(message, pokemon))
-})
-
-app.listen(port, () => console.log(`Node App is running on : http://localhost:${port}`))
-
-
-
-
-
-
-
-
-
-// const loggerFile = (req, res, next) => {
-//     const fs = require('fs')
-//     const loggerFile = fs.createWriteStream('log.txt', {
-//         flags: 'a' //'a' means appending (old data will be preserved)
-//     })
-//
-//     loggerFile.write(`${req.host} - ${req.method} : ${req.url}`) //append string to your file
-//     next()
-// }
-// app.use(loggerFile)
-
-
-
-// var fs = require('fs')
-// var loggerFile = fs.createWriteStream('log.txt', {
-//     flags: 'a' //'a' means appending (old data will be preserved)
-// })
-//
-// loggerFile.write(`${req.host} - ${req.method} : ${req.url}`) //append string to your file
