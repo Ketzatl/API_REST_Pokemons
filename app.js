@@ -1,9 +1,11 @@
 const express = require('express')
 const morgan = require('morgan')
 const bodyParser = require('body-parser')
-const Sequelize = require('sequelize')
+const { Sequelize, DataTypes } = require('sequelize')
 const { success, getUniqueId } = require('./helper.js')
 let pokemons = require('./mock-pokemon')
+const pokemonModel = require('./src/models/pokemon')
+
 
 const app = express()
 const port = 3000
@@ -11,6 +13,7 @@ const port = 3000
 const db_name = 'pokedex-udemy'
 const db_username = 'root'
 const db_password = ''
+const db_host = 'localhost'
 
 // Connexion à la base de données
 const sequelize = new Sequelize(
@@ -21,7 +24,7 @@ const sequelize = new Sequelize(
     // password mariadb
     `${db_password}`,
     {
-  host: 'localhost',
+  host: `${db_host}`,
   dialect: 'mariadb',
         dialect_options: {
             timezone: 'Etc/GMT-2'
@@ -32,12 +35,21 @@ const sequelize = new Sequelize(
 sequelize
     .authenticate()
     .then(() => {
-        console.log('Connection to database has been established successfully.')
+        console.log(`Connection to database ${db_name} has been established successfully. \n`)
     })
     .catch(err => {
-        console.error('Unable to connect to the database:', err)
+        console.error(`Unable to connect to the database ${db_name} \n`, err)
     })
 
+const Pokemon = pokemonModel(sequelize, DataTypes)
+
+sequelize.sync({ force: true })
+    .then(() => {
+        console.log(`Database ${db_name} has been synced successfully. \n`)
+    })
+    .catch(err => {
+        console.error(`Unable to create database & tables \n`, err)
+    })
 
 // MIDDLEWARES
 app
@@ -48,12 +60,12 @@ app
 
 
 
-app.get('/', (req,res) => res.send('Hello again, Express !'))
+app.get('/', (req,res) => res.send('API REST Pokemons'))
 
 
 // READ ALL Pokemons
 app.get('/api/pokemons', (req, res) => {
-    const message = 'La liste des pokémons a bien été récupérée.'
+    const message = 'All Pokemons have been retrieved successfully. \n'
     res.json(success(message, pokemons))
 })
 
@@ -61,7 +73,7 @@ app.get('/api/pokemons', (req, res) => {
 app.get('/api/pokemons/:id', (req, res) => {
     const id = parseInt(req.params.id)
     const pokemon = pokemons.find(pokemon => pokemon.id === id)
-    const message = 'Un pokémon a bien été trouvé.'
+    const message = 'The Pokemon has been retrieved successfully. \n'
     res.json(success(message, pokemon))
 })
 
@@ -70,7 +82,7 @@ app.post('/api/pokemons', (req, res) => {
     const id = getUniqueId(pokemons)
     const pokemonCreated = { ...req.body, ...{id: id, created: new Date()}}
     pokemons.push(pokemonCreated)
-    const message = `Le pokémon ${pokemonCreated.name} a bien été crée.`
+    const message = `Pokemon ${pokemonCreated.name} has been created successfully. \n`
     res.json(success(message, pokemonCreated))
 })
 
@@ -81,7 +93,7 @@ app.put('/api/pokemons/:id', (req, res) => {
     pokemons = pokemons.map(pokemon => {
         return pokemon.id === id ? pokemonUpdated : pokemon
     })
-    const message = `Le pokémon ${pokemonUpdated.name} a bien été modifié.`
+    const message = `The Pokemon ${pokemonUpdated.name} has been updated successfully. \n`
     res.json(success(message, pokemonUpdated))
 });
 
@@ -90,11 +102,11 @@ app.delete('/api/pokemons/:id', (req, res) => {
     const id = parseInt(req.params.id)
     const pokemonDeleted = pokemons.find(pokemon => pokemon.id === id)
     pokemons = pokemons.filter(pokemon => pokemon.id !== id)
-    const message = `Le pokémon ${pokemonDeleted.name} a bien été supprimé.`
+    const message = `The Pokemon ${pokemonDeleted.name} has been deleted successfully. \n`
     res.json(success(message, pokemonDeleted))
 });
 
-app.listen(port, () => console.log(`Node App is running on : http://localhost:${port}`))
+app.listen(port, () => console.log(`\n Node App is running on : http://localhost:${port} \n`))
 
 
 
