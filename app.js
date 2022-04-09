@@ -46,6 +46,18 @@ const Pokemon = pokemonModel(sequelize, DataTypes)
 sequelize.sync({ force: true })
     .then(() => {
         console.log(`Database ${db_name} has been synced successfully. \n`)
+
+        // Insert datas into database
+        // Insert all pokemons present in the mock-pokemon.js file
+        pokemons.map(pokemon => {
+            Pokemon.create({
+                name: pokemon.name,
+                hp: pokemon.hp,
+                cp: pokemon.cp,
+                picture: pokemon.picture,
+                types: pokemon.types.join()
+            }).then(pokemon => console.log(pokemon.toJSON()))
+        })
     })
     .catch(err => {
         console.error(`Unable to create database & tables \n`, err)
