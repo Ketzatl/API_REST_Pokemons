@@ -8,6 +8,7 @@ const sequelize = require('./src/db/sequelize')
 const app = express()
 const port = 3000
 
+
 // MIDDLEWARES
 app
     .use(favicon(__dirname + '/favicon.ico'))
@@ -15,9 +16,16 @@ app
     .use(express.json())
     .use(bodyParser.json())
 
+// Initialize Database
 sequelize.initDb()
 
-// TODO : Create Endpoints
+
+// Endpoints
+require('./src/routes/findAllPokemons')(app)
+require('./src/routes/findPokemonByPk.')(app)
+require('./src/routes/createPokemon')(app)
+require('./src/routes/updatePokemon')(app)
+require('./src/routes/deletePokemon')(app)
 
 app.listen(port, () => console.log(`\n Node App is running on : http://localhost:${port} \n`))
 
