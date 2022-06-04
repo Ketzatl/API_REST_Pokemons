@@ -1,9 +1,8 @@
-const express = require('express')
 const morgan = require('morgan')
 const bodyParser = require('body-parser')
 const favicon = require('serve-favicon')
 const sequelize = require('./src/db/sequelize')
-
+const express = require('express')
 
 const app = express()
 const port = 3000
@@ -11,10 +10,10 @@ const port = 3000
 
 // MIDDLEWARES
 app
-    .use(favicon(__dirname + '/favicon.ico'))
     .use(morgan('dev'))
     .use(express.json())
     .use(bodyParser.json())
+
 
 // Initialize Database
 sequelize.initDb()
